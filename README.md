@@ -15,19 +15,19 @@ When persisting this collection of values (Mysql, Elasticsearch), we use intensi
 
 ## Problems
 
-Do not that in theory, these problems should be highlited by the use of the profiler.
+Do note that, in theory these problems should be highlited by the use of the profiler.
 It's the role of the profile to determine if an optimization worths an improvement or not.
 
-Here, we are doing the opposite: it is to better understand the problem in the Blackfire profile.
+Here, we are doing the opposite: it is to better understand the problem in a Blackfire profile.
 
 ### Normalizer pattern
 
-The normalizer pattern iterates over all normalizers declared in the serializer, in order to find the good one for a given object.
+The normalizer pattern iterates over all normalizers declared in the serializer in order to find the good one for a given object (`supports` function).
 The more you have normalizers in the registry, slower it is to find the good normalizer.
 
-So, when normalizing value collection of 1000 products values and having 15 normalizers registered in the serializer, a lot of time is wasted at finding the normalizer for the product values. 
+So, when normalizing a value collection of 1000 products values and having 15 normalizers registered in the serializer, a lot of time is wasted at finding the normalizer for the product values. 
 
-Note: The complexity is O(m * n) where "m" is the number of product values and "n" the number of normalizers declared in the registry.
+Note: The complexity  of looping on it is O(m * n) where "m" is the number of product values and "n" the number of normalizers declared in the registry.
 
 The solution to avoid this complexity is to call directly the normalizer instead of calling the serializer.
 
@@ -37,11 +37,11 @@ Each value is merged into the normalized value collection by using `array_merge_
 The problem is pretty obvious when you know how this function works.
 
 The `$result` variable has one more item per iteration in the loop.
-As the arrays to be merged are passed by copy, it copies a bigger and bigger array.
+As the arrays to be merged are passed by copy, it copies an array which becomes bigger and bigger.
 
-Note: we can easily proove that it's a O(n^2) complexity as the complexity is a suite 1 + 2 + 3 + ... + "m", where "m" is the number of product values.
+Note: we can easily proove that it's a O(m^2) complexity as the complexity is a suite 1 + 2 + 3 + ... + "m", where "m" is the number of product values.
 
-As `array_merge_recursive` is a varidic function, the solution is to call only once the function this way : `array_merge_recusrive(...$normalizedValues)`.
+As `array_merge_recursive` is a variadic function, the solution is to call only once the function this way : `array_merge_recusrive(...$normalizedValues)`.
 
 ## Results
 
